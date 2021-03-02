@@ -5,8 +5,8 @@
 #include <vector>
 #include "tubex.h"
 #include "tubex-solve.h"
-#include <capd/capdlib.h>
-#include <tubex_capdTubeContractor.h>
+#include <tubex_CtcCapd.h>
+
 using namespace std;
 using namespace ibex;
 using namespace tubex;
@@ -17,42 +17,38 @@ TFunction f1("x1", "x2" ,"(-x2;-100*x1)");
 
 void contract(TubeVector& x, double t0, bool incremental)
 {
-  //capdcontract (x,f,f1, t0, incremental);
-  capdcontract (x,f,f1, t0, false);
+  CtcCapd ctccapd(f,f1);
+  if (x.volume() < DBL_MAX && x.nb_slices() > 1)
+    ctccapd.preserve_slicing(true);
+  else
+    ctccapd.preserve_slicing(false);
+  ctccapd.contract (x, t0, incremental);
 }
  
 
-  
-
-
-
 
 int main()
-
 {    
 
-  
-
   Interval domain(0.,1);
+  TubeVector x(domain, 2);
 
-    TubeVector x(domain, 2);
+  IntervalVector v(2);
+  v[0]=Interval(1.,1.);
 
-    IntervalVector v(2);
-    v[0]=Interval(1.,1.);
+  v[1]=Interval(-100.,100.);
+  //    v[1]=Interval(-1.e300,1.e300);
+  x.set(v, 0.); // ini
+  v[0]=Interval(0.);
 
-    v[1]=Interval(-100.,100.);
-    //    v[1]=Interval(-1.e300,1.e300);
-    x.set(v, 0.); // ini
-    v[0]=Interval(0.);
-
-    v[1]=Interval(-100,100.);
-    //v[1]=Interval(-1.e300,1.e300);
+  v[1]=Interval(-100,100.);
+  //v[1]=Interval(-1.e300,1.e300);
 
 
-    x.set(v,1.);
+  x.set(v,1.);
     
-    double eps0=0.1;
-    double eps1=0.1;
+  double eps0=0.1;
+  double eps1=0.1;
     
     /* =========== SOLVER =========== */
     Vector epsilon(2);

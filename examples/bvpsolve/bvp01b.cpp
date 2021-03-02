@@ -1,12 +1,13 @@
-//created by bedouhene 09/12/2019
+//created by bneveu
 // BvpSolve 1 (4 variants : ksi=1, ksi=0.1, ksi=0.01, ksi=0.001
 
 #include <iostream>
 #include <vector>
 #include "tubex.h"
 #include "tubex-solve.h"
-#include <capd/capdlib.h>
-#include <tubex_capdTubeContractor.h>
+
+#include <tubex_CtcCapd.h>
+
 
 using namespace std;
 using namespace ibex;
@@ -18,7 +19,12 @@ TFunction f1("x1", "x2" ,"(-x2;-10*x1)");
 
 void contract(TubeVector& x, double t0, bool incremental)
 {
-  capdcontract (x,f,f1, t0, incremental);
+  CtcCapd ctccapd(f,f1);
+  if (x.volume() < DBL_MAX && x.nb_slices() > 1)
+    ctccapd.preserve_slicing(true);
+  else
+    ctccapd.preserve_slicing(false);
+  ctccapd.contract (x, t0, incremental);
 }
  
 

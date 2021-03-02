@@ -6,8 +6,8 @@
 #include <vector>
 #include "tubex.h"
 #include "tubex-solve.h"
-#include <capd/capdlib.h>
-#include <tubex_capdTubeContractor.h>
+#include <tubex_CtcCapd.h>
+
 
 using namespace std;
 using namespace ibex;
@@ -16,9 +16,14 @@ using namespace tubex;
   TFunction f("x1", "x2" ,"(x2;50*x1*(1-x2))");
   TFunction f1("x1", "x2" ,"(-x2;-50*x1*(1-x2))");
 void contract(TubeVector& x, double t0, bool incremental)
-{
- capdcontract (x,f,f1, t0, incremental);
-} 
+{CtcCapd ctccapd(f,f1);
+  if (x.volume() < DBL_MAX && x.nb_slices() > 1)
+    ctccapd.preserve_slicing(true);
+  else
+    ctccapd.preserve_slicing(false);
+  ctccapd.contract (x, t0, incremental);
+}
+  
 
     
 
@@ -71,7 +76,7 @@ int main() {
 
     solver.set_bisection_timept(-1);
 
-    solver.set_refining_mode(2);
+    solver.set_refining_mode(0);
     solver.set_stopping_mode(0);
     solver.set_contraction_mode(2);
     solver.set_var3b_external_contraction(true);

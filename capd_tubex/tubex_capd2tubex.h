@@ -43,10 +43,10 @@ namespace tubex
    */
 
     TubeVector ibex2tubex(std::vector<ibex::IntervalVector>& ibex_curve, std::vector<ibex::IntervalVector>& gates, std::vector<double> & gatetimes);
-    TubeVector ibex2tubex2(std::vector<ibex::IntervalVector>& ibex_curve, std::vector<ibex::IntervalVector>& gates, std::vector<double> & gatetimes);
+
   /** \brief Combination of capd2ibex and ibex2tubex, to generate a tube from a curve obtained by
    * the guaranteed integration of CAPD
-   * \param domain period of tine on which we would like to perform the integration
+   * \param domain period of time on which we would like to perform the integration
    * \param f function that we would like to integrate
    * \param x0 The initial condition (at domain.lb())
    * \param timestep time step desired for the integration. If equal to 0 CAPD will calculate the timestep by itself
@@ -54,13 +54,16 @@ namespace tubex
    * \return tube from a curve obtained by the guaranteed integration of CAPD
    */
 
-    TubeVector capd2tubex(const ibex::Interval& domain, const TFunction& f, const ibex::IntervalVector& x0, const double timestep);
-
+  
+    TubeVector capd2tubex(const ibex::Interval& domain, const tubex::TFunction& f, const ibex::IntervalVector& x0, const double timestep);
+    /** \brief Variant with the differential function given by a string 
+     */
+    
+    TubeVector capd2tubex(const ibex::Interval& domain, const std::string&  capd_string, const ibex::IntervalVector& x0, const double timestep);
     /* tubevector mirror for computing backward integration with CAPD */
     TubeVector reversetube(const TubeVector & tubevector);
     /* tube mirror for computing backward integration with CAPD */
     Tube reversetube(const Tube & tube);
- 
     
 }
 

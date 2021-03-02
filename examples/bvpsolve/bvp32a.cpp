@@ -6,7 +6,7 @@
 #include "tubex.h"
 #include "tubex-solve.h"
 #include <capd/capdlib.h>
-#include <tubex_capdTubeContractor.h>
+#include <tubex_CtcCapd.h>
 
 using namespace std;
 using namespace ibex;
@@ -15,9 +15,14 @@ TFunction f("x1", "x2" ,"x3", "x4", "(x2;x3;x4;x2*x3-x1*x4)");
 TFunction f1("x1", "x2" ,"x3", "x4","(-x2;-x3;-x4;-(x2*x3-x1*x4))");
 
 void contract(TubeVector& x, double t0, bool incremental)
-{
-  capdcontract (x,f,f1, t0, incremental);
+{CtcCapd ctccapd(f,f1);
+  if (x.volume() < DBL_MAX && x.nb_slices() > 1)
+    ctccapd.preserve_slicing(true);
+  else
+    ctccapd.preserve_slicing(false);
+  ctccapd.contract (x, t0, incremental);
 }
+ 
     
 int main() {
     TFunction f("x1", "x2" ,"x3", "x4", "(x2;x3;x4;x2*x3-x1*x4)");
@@ -88,12 +93,12 @@ int main() {
     solver.set_refining_mode(2);
     solver.set_stopping_mode(0);
     solver.set_contraction_mode(4);
-    solver.set_var3b_external_contraction(true);
+    solver.set_var3b_external_contraction(false);
     std::ofstream Out("err.txt");
     std::streambuf* OldBuf = std::cerr.rdbuf(Out.rdbuf());
-    //    list<TubeVector> l_solutions = solver.solve(x, f, &contract);
-    //    list<TubeVector> l_solutions = solver.solve(x, &contract);
-    list<TubeVector> l_solutions = solver.solve(x, f);
+    list<TubeVector> l_solutions = solver.solve(x, f, &contract);
+    //list<TubeVector> l_solutions = solver.solve(x, &contract);
+    //    list<TubeVector> l_solutions = solver.solve(x, f);
     std::cerr.rdbuf(OldBuf);
     
     cout << "nb sol " << l_solutions.size() << endl;

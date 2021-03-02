@@ -58,7 +58,7 @@ link_directories(${CAPD_LIB_DIR})
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -frounding-math -D__USE_FILIB__")
 set(CAPD_LIBS   tubex-solve tubex capd ibex prim)
 include_directories(capd_tubex)
-add_library(Capdtubex STATIC capd_tubex/tubex_capd2tubex.h capd_tubex/tubex_capd2tubex.cpp capd_tubex/tubex_TubeVectorODE.h capd_tubex/tubex_TubeVectorODE.cpp capd_tubex/tubex_capdTubeContractor.h capd_tubex/tubex_capdTubeContractor.cpp)
+add_library(Capdtubex STATIC capd_tubex/tubex_CtcCapd.h capd_tubex/tubex_CtcCapd.cpp capd_tubex/tubex_TubeVectorODE.h capd_tubex/tubex_TubeVectorODE.cpp capd_tubex/tubex_capd2tubex.h capd_tubex/tubex_capd2tubex.cpp)
 target_link_libraries(Capdtubex ${CAPD_LIBS})
 
 

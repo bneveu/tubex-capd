@@ -6,8 +6,7 @@
 #include <vector>
 #include "tubex.h"
 #include "tubex-solve.h"
-#include <capd/capdlib.h>
-#include <tubex_capdTubeContractor.h>
+#include <tubex_CtcCapd.h>
 
 using namespace std;
 using namespace ibex;
@@ -18,7 +17,14 @@ TFunction f1( "x2" ,"x3","(-x3;-100*(-t*x3-x2))");
 
 
 void contract(TubeVector& x, double t0, bool incremental)
-{capdcontract (x,f,f1, t0, incremental);
+{
+ CtcCapd ctccapd(f,f1);
+  if (x.volume() < DBL_MAX && x.nb_slices() > 1)
+    ctccapd.preserve_slicing(true);
+  else
+    ctccapd.preserve_slicing(false);
+  ctccapd.contract (x, t0, incremental);
+
 }
 
 
@@ -44,7 +50,6 @@ int main() {
     
     
     
-
     double eps1=1;
     double eps2=1;
     
@@ -67,11 +72,11 @@ int main() {
 
     solver.set_var3b_timept(0);
     solver.set_trace(1);
-    solver.set_max_slices(100000);
+    solver.set_max_slices(50000);
 
     solver.set_bisection_timept(3);
 
-    solver.set_refining_mode(2);
+    solver.set_refining_mode(0);
     solver.set_stopping_mode(0);
     solver.set_contraction_mode(4);
     solver.set_var3b_external_contraction(true);
