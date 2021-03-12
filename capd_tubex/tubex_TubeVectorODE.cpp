@@ -24,7 +24,7 @@ namespace tubex
     switch(mode)
     {
       case CAPD_MODE:
-        return capd2tubex(domain, f, x0, timestep);
+        return capd2tubex(domain, domain, f, x0, timestep);
 
       // Additional integration tools might be added in the future
 

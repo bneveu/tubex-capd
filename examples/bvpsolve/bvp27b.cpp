@@ -1,7 +1,6 @@
-//created by neveu sept 30 2020
-// problem Bvpsolve25 (xi=0.1)
+//created by neveu dec 11 2020
+// problem Bvpsolve27 (xi=0.02)
 
-//created by bedouhene 09/12/2019
 
 #include <iostream>
 #include <vector>
@@ -14,36 +13,40 @@ using namespace std;
 using namespace ibex;
 using namespace tubex;
 
-TFunction f("x1", "x2" ,"(x2;10*x1*(1-x2))");
-TFunction f1("x1", "x2" ,"(-x2;-(10*x1*(1-x2)))");
-
+TFunction f("x1", "x2" ,"(x2;50*x1*(1-x2))");
+TFunction f1("x1", "x2" ,"(-x2;-50*x1*(1-x2))");
 
 void contract(TubeVector& x, double t0, bool incremental)
-{
-  CtcCapd ctccapd(f,f1);
+{ CtcCapd ctccapd(f,f1);
   if (x.volume() < DBL_MAX && x.nb_slices() > 1)
     ctccapd.preserve_slicing(true);
   else
     ctccapd.preserve_slicing(false);
   ctccapd.contract (x, t0, incremental);
 }
+  
+
+    
 
 
 int main() {
 
+   
     /* =========== PARAMETERS =========== */
 
     Interval domain(0.,1.);
 
-    TubeVector x(domain,2);
+    //TubeVector x(domain,2);
+    TubeVector x(domain,IntervalVector(2,Interval(-1000,1000)));
+
     IntervalVector v(2);
-    v[0]=Interval(-1./3.);
-    v[1]=Interval(0.,5.);
+    v[0]=Interval(1.);
+    v[1]=Interval(-100.,100.);
 
     
     x.set(v, 0.); // ini
     v[0]=Interval(1./3.);
-    v[1]=Interval(0.,5.);
+    v[1]=Interval(-100.,100.);
 
     x.set(v,1.);
     
@@ -61,18 +64,16 @@ int main() {
 
     tubex::Solver solver(epsilon);
 
-    solver.set_refining_fxpt_ratio(2.0);
+    solver.set_refining_fxpt_ratio(2);
     solver.set_propa_fxpt_ratio(0.);
-    //solver.set_var3b_fxpt_ratio(-1);
-    solver.set_var3b_fxpt_ratio(0.9);
-    //solver.set_var3b_fxpt_ratio(0.99);
+    solver.set_var3b_fxpt_ratio(0.99);
 
-    solver.set_var3b_propa_fxpt_ratio(0.9);
+    solver.set_var3b_propa_fxpt_ratio(0.99);
     
 
-    solver.set_var3b_timept(0);
+    solver.set_var3b_timept(2);
     solver.set_trace(1);
-    solver.set_max_slices(2000);
+    solver.set_max_slices(20000);
 
     solver.set_bisection_timept(-1);
 
@@ -80,7 +81,6 @@ int main() {
     solver.set_stopping_mode(0);
     solver.set_contraction_mode(2);
     solver.set_var3b_external_contraction(true);
-    //solver.set_var3b_external_contraction(false);
     
     std::ofstream Out("err.txt");
     std::streambuf* OldBuf = std::cerr.rdbuf(Out.rdbuf());

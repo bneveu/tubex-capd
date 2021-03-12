@@ -70,7 +70,7 @@ int main() {
 
     solver.set_var3b_propa_fxpt_ratio(0.99);
 
-    solver.set_var3b_timept(0);
+    solver.set_var3b_timept(2);
     solver.set_trace(1);
     solver.set_max_slices(50000);
 

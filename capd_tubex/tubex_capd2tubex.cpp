@@ -62,14 +62,21 @@ namespace tubex
 
 
 
-  vector<ibex::IntervalVector> capd2ibex(const ibex::Interval& domain, capd::IMap& vectorField, const ibex::IntervalVector& x0, vector<ibex::IntervalVector>& gates, vector<double>& gatetimes,const double& timestep )
+  vector<ibex::IntervalVector> capd2ibex(const ibex::Interval& tubedomain,const ibex::Interval& integrationdomain, capd::IMap& vectorField, const ibex::IntervalVector& x0, vector<ibex::IntervalVector>& gates, vector<double>& gatetimes,const double& timestep )
     {
         int a_capd_dim = x0.size();
 
         vector<ibex::IntervalVector> ibex_curve;
+	if (tubedomain.lb()<integrationdomain.lb()){
+	  
+	  gates.push_back(IntervalVector(a_capd_dim));
+	  gatetimes.push_back(tubedomain.lb());
+	  ibex_curve.push_back(IntervalVector(a_capd_dim));
+	}
+	  
 	gates.push_back(x0);
-	gatetimes.push_back(domain.lb());
-
+	gatetimes.push_back(integrationdomain.lb());
+       
         try
         {
             // CAPD processing
@@ -77,8 +84,9 @@ namespace tubex
             // The solver uses high order enclosure method to verify the existence
             // of the solution.
             // The order will be set to 20.
-	  capd::dynsys::ILastTermsStepControl SCP(1, 1e-6);
-	  capd::IOdeSolver solver(vectorField,20,SCP);
+	  // capd::dynsys::ILastTermsStepControl SCP(1, 1e-6);
+	  //	  capd::IOdeSolver solver(vectorField,20,SCP);
+	  capd::IOdeSolver solver(vectorField,20);
 
             // Set a fixed integration step if needed
             if (timestep!=0)
@@ -94,11 +102,11 @@ namespace tubex
                 a_capd[i] = capd::interval(x0[i].lb(),x0[i].ub());
             }
             // define a doubleton representation of the interval vector x
-	    capd::C0Rect2Set s(a_capd,domain.lb());
+	    capd::C0Rect2Set s(a_capd,integrationdomain.lb());
 	    //capd::C0HORect2Set s(a_capd,domain.lb());
 
             // Here we start to integrate.
-            double T=domain.ub();
+            double T=integrationdomain.ub();
             timeMap.stopAfterStep(true);
 	    
             do
@@ -115,16 +123,17 @@ namespace tubex
 		ibexenclosure[i]=Interval(enclosure[i].left().leftBound(),enclosure[i].right().rightBound() );
 	      //	      cout << " ibex enclosure " << ibexenclosure << endl;
 	      ibex_curve.push_back(ibexenclosure);
-	      if (timeMap.getCurrentTime().right().rightBound() < domain.ub())
+	      if (timeMap.getCurrentTime().right().rightBound() < integrationdomain.ub())
 		gatetimes.push_back(timeMap.getCurrentTime().right().rightBound());
 	      else
-		gatetimes.push_back(domain.ub());
+		gatetimes.push_back(integrationdomain.ub());
 	      //      cout << " result " << result << " time " << timeMap.getCurrentTime() << endl;
 	    
             }while(!timeMap.completed());
 
 
         }
+	
 
         catch(exception& e)
         {
@@ -133,12 +142,18 @@ namespace tubex
 	  throw Exception("capd2ibex", e.what());
 
         }
-	
+
+	if (tubedomain.ub()> integrationdomain.ub()){
+	  
+	  gates.push_back(IntervalVector(a_capd_dim));
+	  gatetimes.push_back(tubedomain.ub());
+	  ibex_curve.push_back(IntervalVector(a_capd_dim));
+	}
         return(ibex_curve);
     }
   
 
-  TubeVector ibex2tubex(vector<ibex::IntervalVector>& ibex_curve, vector<ibex::IntervalVector> & gates , vector<double> & gatetimes){
+  TubeVector ibex2tubex(const vector<ibex::IntervalVector>& ibex_curve, vector<ibex::IntervalVector> & gates , vector<double> & gatetimes){
   // Creating our Tube Vector object thanks to the info previously stored
     vector<ibex::Interval> vdomains;
     for (int i=0 ; i< gatetimes.size()-1; i++)
@@ -154,27 +169,25 @@ namespace tubex
   }
   
 
-  TubeVector capd2tubex(const Interval& domain, const TFunction& f, const IntervalVector& x0, const double timestep){
+  TubeVector capd2tubex(const Interval& tubedomain, const Interval& integrationdomain, const TFunction& f, const IntervalVector& x0, const double timestep){
     string s =tubexFnc2capdString(f);
-    return capd2tubex(domain , s , x0, timestep);
+    return capd2tubex(tubedomain , integrationdomain, s , x0, timestep);
   }
 
-  TubeVector capd2tubex(const Interval& domain, const string& capd_string, const IntervalVector& x0, const double timestep)
+  TubeVector capd2tubex(const Interval& tubedomain, const Interval& integrationdomain, const string& capd_string, const IntervalVector& x0, const double timestep)
   {
     try
         {
 	  capd::IMap vectorField(capd_string);
-	  //cout << " after capd_string " << endl;
 	  vector<double> gatetimes;
 	  vector<IntervalVector> gates;
-	  vector<IntervalVector> ibex_curve = capd2ibex(domain, vectorField, x0, gates,gatetimes,timestep);
-	  //	    cout << " ibex curve " <<  ibex_curve.size() << endl;
+	  const vector<IntervalVector> & ibex_curve = capd2ibex(tubedomain, integrationdomain, vectorField, x0, gates,gatetimes,timestep);
 
 	  if (!ibex_curve.empty())
 	    return(ibex2tubex(ibex_curve,gates, gatetimes));
 	  else
 	    {
-	      TubeVector empt(domain,x0.size());
+	      TubeVector empt(tubedomain,x0.size());
 	      empt.set_empty();
 	      return empt;
 	    }
@@ -203,7 +216,6 @@ namespace tubex
     for(const Slice *s = tube.first_slice() ; s != NULL ; s = s->next_slice()){
       tube1.sample(-(s->tdomain().lb()),s->input_gate());
       tube1.first_slice()->set_envelope(s->codomain());
-    
     }
     tube1.first_slice()->set_input_gate(tube.last_slice()->output_gate());
     return tube1;

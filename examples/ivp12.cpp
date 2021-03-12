@@ -4,43 +4,24 @@
 #include <vector>
 #include "ibex.h"
 #include "tubex.h"
-
 #include "tubex-solve.h"
+#include <tubex_CtcCapd.h>
 
 using namespace std;
 using namespace ibex;
 using namespace tubex;
+TFunction f("x", "-x^2");
+TFunction f1("x", "x^2");
 
-#include <capd/capdlib.h>
-#include <tubex_capd2tubex.h>
-#include <tubex_TubeVectorODE.h>
-TFunction f("x", "(-x^2)");
-TFunction f1("x", "(x^2)");
 
 void contract(TubeVector& x, double t0, bool incremental)
 {
-  Interval domain= x[0].tdomain();
-
-  double timestep = 0.;
-  IntervalVector a0(x(domain.lb()));
-
-  TubeVector a = TubeVectorODE(domain,f,a0,timestep,CAPD_MODE);
-
-  if (x.volume() < DBL_MAX)
-    x&=a;
+   CtcCapd ctccapd(f,f1);
+  if (x.volume() < DBL_MAX && x.nb_slices() > 1)
+    ctccapd.preserve_slicing(true);
   else
-    x=x&a;
-  if (!(x.is_empty())){
-    Interval domain1= Interval(-domain.ub(),-domain.lb());
-    a0=x(domain.ub());
-
-    TubeVector b = TubeVectorODE(domain1,f1,a0,timestep,CAPD_MODE);
-    if (x.volume() < DBL_MAX)
-      x&=reversetube(b);
-    else
-      x=x&reversetube(b);
-  }
-   
+    ctccapd.preserve_slicing(false);
+  ctccapd.contract (x, t0, incremental);
 }
 
 int main()

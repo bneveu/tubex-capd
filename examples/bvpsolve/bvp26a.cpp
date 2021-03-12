@@ -30,7 +30,7 @@ int main() {
 
     Interval domain(0.,1.);
 
-    //TubeVector x(domain,2);
+    //    TubeVector x(domain,2);
     TubeVector x(domain,IntervalVector(2,Interval(-1000,1000)));
 
     IntervalVector v(2);
@@ -60,12 +60,12 @@ int main() {
 
     solver.set_refining_fxpt_ratio(2.0);
     solver.set_propa_fxpt_ratio(0.);
-    solver.set_var3b_fxpt_ratio(0.);
+    solver.set_var3b_fxpt_ratio(0.9);
 
-    solver.set_var3b_propa_fxpt_ratio(0.);
+    solver.set_var3b_propa_fxpt_ratio(0.9);
     
 
-    solver.set_var3b_timept(0);
+    solver.set_var3b_timept(2);
     solver.set_trace(1);
     solver.set_max_slices(1000);
 
@@ -80,7 +80,7 @@ int main() {
     std::streambuf* OldBuf = std::cerr.rdbuf(Out.rdbuf());
     list<TubeVector> l_solutions = solver.solve(x, f, &contract);
     //    list<TubeVector> l_solutions = solver.solve(x, &contract);
-    //    list<TubeVector> l_solutions = solver.solve(x, f);
+    //   list<TubeVector> l_solutions = solver.solve(x, f);
     std::cerr.rdbuf(OldBuf);
     
     cout << "nb sol " << l_solutions.size() << endl;
