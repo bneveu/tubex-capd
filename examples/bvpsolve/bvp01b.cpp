@@ -77,9 +77,9 @@ int main()
     solver.set_trace(1);
     solver.set_max_slices(2000);
 
-    solver.set_refining_mode(3);
+    solver.set_refining_mode(2);
     solver.set_bisection_timept(3);
-    solver.set_contraction_mode(4);
+    solver.set_contraction_mode(2);
     solver.set_stopping_mode(0);
     solver.set_var3b_external_contraction(true);
     cout.precision(6);

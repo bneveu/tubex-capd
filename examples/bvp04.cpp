@@ -39,24 +39,24 @@ void contract(TubeVector& x, double t0, bool incremental)
     hc4.contract(bounds);
     x.set(IntervalVector(bounds[0]), 0.);
     x.set(IntervalVector(bounds[1]), 1.);
- Interval domain= x[0].tdomain();
+    Interval domain= x[0].tdomain();
 
-  double timestep = 0.;
-  IntervalVector a0(x(domain.lb()));
-  TubeVector a = TubeVectorODE(domain,f,a0,timestep,CAPD_MODE);
+    double timestep = 0.;
+    IntervalVector a0(x(domain.lb()));
+    TubeVector a = TubeVectorODE(domain,f,a0,timestep,CAPD_MODE);
 
-  if (x.volume() < DBL_MAX)
-    x&=a;
-  else
-    x=x&a;
+    if (x.volume() < DBL_MAX)
+      x&=a;
+    else
+      x=x&a;
 
-  Interval domain1= Interval(-domain.ub(),-domain.lb());
-  a0=x(domain.ub());
-  TubeVector b = TubeVectorODE(domain1,f1,a0,timestep,CAPD_MODE);
-  if (x.volume() < DBL_MAX)
-    x&=reversetube(b);
-  else
-    x=x&reversetube(b);
+    Interval domain1= Interval(-domain.ub(),-domain.lb());
+    a0=x(domain.ub());
+    TubeVector b = TubeVectorODE(domain1,f1,a0,timestep,CAPD_MODE);
+    if (x.volume() < DBL_MAX)
+      x&=reversetube(b);
+    else
+      x=x&reversetube(b);
 
    
 }
@@ -85,7 +85,7 @@ int main()
     tubex::Solver solver(epsilon);
 
     solver.set_refining_fxpt_ratio(2.);
-    solver.set_propa_fxpt_ratio(0.99);
+    solver.set_propa_fxpt_ratio(0.9);
     // solver.set_var3b_fxpt_ratio(0.999);
     solver.set_var3b_fxpt_ratio(-1);
     solver.set_var3b_propa_fxpt_ratio(0.99);

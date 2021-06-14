@@ -13,8 +13,8 @@ using namespace ibex;
 using namespace tubex;
 
 
-TFunction f("x1", "x2" ,"(x2;x1)");
-TFunction f1("x1", "x2" ,"(-x2;-x1)");
+TFunction f("x1", "x2" ,"(x2;-10*x2)");
+TFunction f1("x1", "x2" ,"(-x2;10*x2)");
 
 
 void contract(TubeVector& x, double t0, bool incremental)
@@ -39,12 +39,12 @@ int main()
     TubeVector x(domain, 2);
 
     IntervalVector v(2);
-    v[0]=Interval(1.,1.);
+    v[0]=Interval(1.);
 
     v[1]=Interval(-100.,100.);
     //    v[1]=Interval(-1.e300,1.e300);
     x.set(v, 0.); // ini
-    v[0]=Interval(0.);
+    v[0]=Interval(2.);
 
     v[1]=Interval(-100,100.);
     //v[1]=Interval(-1.e300,1.e300);
@@ -70,7 +70,7 @@ int main()
     solver.set_var3b_propa_fxpt_ratio(0.99);
     solver.set_var3b_timept(2);
     solver.set_trace(1);
-    solver.set_max_slices(2000);
+    solver.set_max_slices(4000);
 
     solver.set_refining_mode(2);
     solver.set_bisection_timept(3);

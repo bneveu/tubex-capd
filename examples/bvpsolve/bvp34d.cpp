@@ -33,7 +33,8 @@ int main() {
     /* =========== PARAMETERS =========== */
 
     Interval domain(0.,1.);
-    TubeVector x(domain,2);
+    TubeVector x(domain,IntervalVector(2, Interval(-1.e50,1.e50)));
+    //    TubeVector x(domain,2);
     IntervalVector v(2);
     v[0]=Interval(0.,0.);
 
@@ -60,24 +61,24 @@ int main() {
     solver.set_refining_fxpt_ratio(2);
     //    solver.set_refining_fxpt_ratio(2);
 
-    solver.set_propa_fxpt_ratio(0.99);
+    solver.set_propa_fxpt_ratio(0.);
 
-    //solver.set_var3b_fxpt_ratio(0.9);
-    solver.set_var3b_fxpt_ratio(-1.);
+    solver.set_var3b_fxpt_ratio(0.99);
+    //    solver.set_var3b_fxpt_ratio(-1);
 
 
-    solver.set_var3b_propa_fxpt_ratio(0.9);
+    solver.set_var3b_propa_fxpt_ratio(0.99);
     
 
     solver.set_var3b_timept(2);
     solver.set_trace(1);
-    solver.set_max_slices(10000);
+    solver.set_max_slices(20000);
     //    solver.set_max_slices(1);
-    solver.set_bisection_timept(-1);
+    solver.set_bisection_timept(3);
 
-    solver.set_refining_mode(0);
+    solver.set_refining_mode(2);
     solver.set_stopping_mode(0);
-    solver.set_contraction_mode(4);
+    solver.set_contraction_mode(2);
     solver.set_var3b_external_contraction(true);
     std::ofstream Out("err.txt");
     std::streambuf* OldBuf = std::cerr.rdbuf(Out.rdbuf());

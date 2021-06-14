@@ -1,0 +1,171 @@
+/** 
+ *  tubex-lib - Examples
+ *  Solver testcase
+ * ----------------------------------------------------------------------------
+ *
+ *  \date       2018
+ *  \author     Simon Rohou
+ *  \copyright  Copyright 2019 Simon Rohou
+ *  \license    This program is distributed under the terms of
+ *              the GNU Lesser General Public License (LGPL).
+ */
+
+#include <iostream>
+#include <vector>
+#include "tubex.h"
+#include "ibex.h"
+#include "tubex-solve.h"
+
+using namespace std;
+using namespace ibex;
+using namespace tubex;
+
+class FncIntegroDiff : public TFnc {
+  public: 
+
+    FncIntegroDiff() : TFnc(1, 1, true) {};
+  const TubeVector eval_vector(const TubeVector& x) const { 
+    // cout << "eval vector " << endl;
+    return TFnc::eval_vector(x); }
+  const Interval eval(const IntervalVector& x) const { /* scalar case not defined */ }
+  const Interval eval(int slice_id, const TubeVector& x) const { /* scalar case not defined */ }
+  const Interval eval(const Interval& t, const TubeVector& x) const { /* scalar case not defined */ }
+
+
+  const IntervalVector eval_vector(const IntervalVector& x) const {
+            return Vector(1, 1.) - 2. * x;
+}
+
+
+  //  const IntervalVector eval_vector(const IntervalVector& x) const {};
+
+  //  const IntervalVector eval_vector(const IntervalVector& x) const {}
+
+  const IntervalVector eval_vector(int slice_id, const TubeVector& x) const
+
+    {
+      //      cout <<  " tube " << x[0] << endl;
+      //     cout << " slice_id " << slice_id << endl;
+      //     cout << " slice " <<  *(x[0].slice(slice_id)) << endl;
+      Interval t = x[0].slice(slice_id)->tdomain();
+      //      cout << " t " << t << endl;
+      return eval_vector(t, x);
+    }
+
+  const IntervalVector eval_vector(const Interval& t, const TubeVector& x) const
+    {
+      return Vector(1, 1.) - 2. * x(t) - 5. * x.integral(t);
+      //return Vector(1, 1.) - 2. * sin(x(t)[0]) - 5. * x.integral(t); // unsolved by Mathematica
+    }
+
+  const IntervalVector eval_vector(double t, const TubeVector& x) const
+    {
+      return Vector(1, 1.) - 2. * x(t) - 5. * x.integral(t);
+      //return Vector(1, 1.) - 2. * sin(x(t)[0]) - 5. * x.integral(t); // unsolved by Mathematica
+    }
+
+
+};
+
+void contract(TubeVector& x, double t0, bool incremental)
+{
+  // Boundary constraints
+
+    Variable vx0, vx1;
+    SystemFactory fac;
+    fac.add_var(vx0);
+    fac.add_var(vx1);
+    fac.add_ctr(sqr(vx0) + sqr(vx1) = 1);
+    System sys(fac);
+    ibex::CtcHC4 hc4(sys);
+    IntervalVector bounds(2);
+    bounds[0] = x[0](0.);
+    bounds[1] = x[0](1.);
+    hc4.contract(bounds);
+    x.set(IntervalVector(1, bounds[0]), 0.);
+    x.set(IntervalVector(1, bounds[1]), 1.);
+
+    
+
+  // Differential equation
+    
+    FncIntegroDiff f;
+    if (x.volume() > 50000.){    
+      CtcPicard ctc_picard(1.1);
+      ctc_picard.preserve_slicing(true);
+
+      ctc_picard.contract(f, x, TimePropag::FORWARD | TimePropag::BACKWARD);
+    //    cout << x[0] << " nb slices " << x[0].nb_slices();
+    }
+    /*
+    TubeVector v = f.eval_vector(x);
+//  CtcDynCid* ctc_dyncid = new CtcDynCid(f);
+    
+    CtcDynCidGuess* ctc_dyncid = new CtcDynCidGuess(f);     
+    // CtcDynBasic* ctc_dyncid = new CtcDynBasic(f);     
+    ctc_dyncid->set_fast_mode(true);
+    CtcIntegration ctc_integration(f,ctc_dyncid);
+    
+    ctc_integration.contract(x,v,x[0].tdomain().lb(), TimePropag::FORWARD, integrodiff) ;
+  
+    ctc_integration.contract(x,v,x[0].tdomain().ub(), TimePropag::BACKWARD,integrodiff ) ;
+  
+    delete ctc_dyncid;
+
+    */
+    
+    CtcDeriv ctc_deriv;
+    ctc_deriv.preserve_slicing(true);
+    ctc_deriv.set_fast_mode(true);
+    //    cout << x[0] << " nb slices " << x[0].nb_slices();
+    
+    //    cout << f.eval_vector(x) << endl;
+    ctc_deriv.contract(x, f.eval_vector(x), TimePropag::FORWARD | TimePropag::BACKWARD);
+
+    
+}
+
+
+
+
+int main()
+{
+  /* =========== PARAMETERS =========== */
+    FncIntegroDiff f;
+    Tube::enable_syntheses(false);
+    int n = 1;
+
+    Vector epsilon(n, 0.02);
+    Interval domain(0.,1.);
+    TubeVector x(domain, n);
+    TrajectoryVector truth1(domain, TFunction("(exp(-t)*(-(cos(2*t)*(-1 + cos(4) + 2*sin(4) + 4*exp(1)*sqrt(2*(1 + cos(4) + 2*exp(2) - sin(4))))) + sin(2*t)*(2 + 2*cos(4) - sin(4) + 2*exp(1)*(2*exp(1) + sqrt(2*(1 + cos(4) + 2*exp(2) - sin(4)))))))/(5 + 3*cos(4) + 8*exp(2) - 4*sin(4))"));
+    TrajectoryVector truth2(domain, TFunction("(exp(-t)*(-(cos(2*t)*(-1 + cos(4) + 2*sin(4) - 4*exp(1)*sqrt(2*(1 + cos(4) + 2*exp(2) - sin(4))))) + sin(2*t)*(2 + 2*cos(4) + 4*exp(2) - sin(4) - 2*exp(1)*sqrt(2*(1 + cos(4) + 2*exp(2) - sin(4))))))/(5 + 3*cos(4) + 8*exp(2) - 4*sin(4))"));
+
+  /* =========== SOLVER =========== */
+
+    tubex::Solver solver(epsilon);
+    //    solver.set_refining_fxpt_ratio(0.999);
+    //    solver.set_refining_fxpt_ratio(0.999);
+    solver.set_refining_fxpt_ratio(2.0);
+    //solver.set_propa_fxpt_ratio(0.99);
+    solver.set_propa_fxpt_ratio(0.9);
+
+    //solver.set_var3b_fxpt_ratio(0.);
+    solver.set_var3b_fxpt_ratio(-1);
+    solver.set_var3b_propa_fxpt_ratio(0.);
+    solver.set_trace(1);
+    solver.set_max_slices(400);
+    solver.set_refining_mode(0);
+    solver.set_var3b_timept(0);
+    solver.set_bisection_timept(0);
+    solver.set_contraction_mode(4);
+    //    solver.figure()->add_trajectoryvector(&truth1, "truth1");
+    //    solver.figure()->add_trajectoryvector(&truth2, "truth2");
+    //    list<TubeVector> l_solutions = solver.solve(x, f, &contract);
+    list<TubeVector> l_solutions = solver.solve(x, &contract);
+
+  // Checking if this example still works:
+  return solver.solutions_contain(l_solutions, truth1) == YES
+      && solver.solutions_contain(l_solutions, truth2) == YES ? EXIT_SUCCESS : EXIT_FAILURE;
+}
+

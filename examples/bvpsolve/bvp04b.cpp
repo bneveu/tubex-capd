@@ -13,8 +13,8 @@ using namespace ibex;
 using namespace tubex;
 
 
-TFunction f("x1", "x2" ,"(x2;x1)");
-TFunction f1("x1", "x2" ,"(-x2;-x1)");
+TFunction f("x1", "x2" ,"(x2;(-x2 + (1.1)*x1)/0.1)");
+TFunction f1("x1", "x2" ,"(-x2;(x2 - (1.1)*x1)/0.1)");
 
 
 void contract(TubeVector& x, double t0, bool incremental)
@@ -33,27 +33,25 @@ void contract(TubeVector& x, double t0, bool incremental)
 int main()
 
 {    
+  Interval domain(-1.,1);
+  double ksi=0.1;
+  TubeVector x(domain, 2);
 
-  Interval domain(0.,1);
-
-    TubeVector x(domain, 2);
-
-    IntervalVector v(2);
-    v[0]=Interval(1.,1.);
-
-    v[1]=Interval(-100.,100.);
+  IntervalVector v(2);
+    
+    v[0]=Interval(1+exp(-2.));
+    v[1]=Interval(-1000.,1000.);
     //    v[1]=Interval(-1.e300,1.e300);
-    x.set(v, 0.); // ini
-    v[0]=Interval(0.);
+    x.set(v, -1.); // ini
+    v[0]=Interval(1 + exp(-22));
 
-    v[1]=Interval(-100,100.);
+    v[1]=Interval(-1000,1000.);
     //v[1]=Interval(-1.e300,1.e300);
-
 
     x.set(v,1.);
     
-    double eps0=0.01;
-    double eps1=0.01;
+    double eps0=0.1;
+    double eps1=0.1;
     
     /* =========== SOLVER =========== */
     Vector epsilon(2);
@@ -70,7 +68,7 @@ int main()
     solver.set_var3b_propa_fxpt_ratio(0.99);
     solver.set_var3b_timept(2);
     solver.set_trace(1);
-    solver.set_max_slices(2000);
+    solver.set_max_slices(20000);
 
     solver.set_refining_mode(2);
     solver.set_bisection_timept(3);

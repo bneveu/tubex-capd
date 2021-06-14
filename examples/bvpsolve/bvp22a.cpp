@@ -26,12 +26,11 @@ int main()
 
 {    
    
-    
 
     Interval domain(0.,1.);
     TubeVector x(domain,2);
-    //    TubeVector x(domain,IntervalVector(2, Interval(-1.e50,1.e50)));  //OK
-    //    TubeVector x(domain,IntervalVector(2, Interval(-1.e100,1.e100)));  // bug Vnode
+    //TubeVector x(domain,IntervalVector(2, Interval(-1.e50,1.e50)));  //OK
+    //TubeVector x(domain,IntervalVector(2, Interval(-1.e100,1.e100)));  // bug Vnode  OK CAPD
     //TubeVector x(domain,0.01,2);
     IntervalVector v(2);
     v[0]=Interval(0.,0.);
@@ -60,14 +59,14 @@ int main()
     solver.set_refining_fxpt_ratio(2.0);
     solver.set_propa_fxpt_ratio(0.0);
 
-    solver.set_var3b_fxpt_ratio(0.9);
+    solver.set_var3b_fxpt_ratio(0.99);
     //solver.set_var3b_fxpt_ratio(-1);
 
     solver.set_var3b_external_contraction (true);
     //    solver.set_var3b_external_contraction (false);
 
-    solver.set_var3b_propa_fxpt_ratio(0.);
-    solver.set_var3b_timept(0);
+    solver.set_var3b_propa_fxpt_ratio(0.99);
+    solver.set_var3b_timept(2);
     solver.set_trace(1);
 
     solver.set_max_slices(40000);
