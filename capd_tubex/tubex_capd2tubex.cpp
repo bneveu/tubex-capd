@@ -161,8 +161,9 @@ namespace tubex
     
     TubeVector output_tube(vdomains,ibex_curve);
     // Sampling the tubevector with the gates calculated by capd
+    //    cout << "gates.size "<<gates.size();
     for (int i =0; i< gates.size(); i++){
-      //cout << i << "  " << gatetimes[i] << "  " << gates[i] << endl;
+      //      if (i==gates.size()-1) cout << i << "  " << gatetimes[i] << "  " << gates[i] << endl;
     output_tube.sample(gatetimes[i],gates[i]);
   }
   return(output_tube);
@@ -175,14 +176,14 @@ namespace tubex
   }
 
   TubeVector capd2tubex(const Interval& tubedomain, const Interval& integrationdomain, const string& capd_string, const IntervalVector& x0, const double timestep)
-  {
+  { 
     try
         {
 	  capd::IMap vectorField(capd_string);
 	  vector<double> gatetimes;
 	  vector<IntervalVector> gates;
 	  const vector<IntervalVector> & ibex_curve = capd2ibex(tubedomain, integrationdomain, vectorField, x0, gates,gatetimes,timestep);
-
+	  //	  cout << "ibex_curve" <<  gates.size() << "  " << gatetimes.size() << endl;
 	  if (!ibex_curve.empty())
 	    return(ibex2tubex(ibex_curve,gates, gatetimes));
 	  else
@@ -195,7 +196,7 @@ namespace tubex
         }
     catch(exception& e)
       {
-	throw Exception("capdt2ubex", e.what());
+	throw Exception("capd2tubex", e.what());
       }
     
   }
@@ -205,8 +206,9 @@ namespace tubex
   TubeVector reversetube(const TubeVector & tubevector){
     Interval domain1 (-tubevector[0].tdomain().ub(), -tubevector[0].tdomain().lb());
     TubeVector tubevector1(domain1, tubevector.size());
-    for (int i=0;i< tubevector.size(); i++)
+    for (int i=0;i< tubevector.size(); i++){
       tubevector1[i]=reversetube(tubevector[i]);
+    }
     return tubevector1;  
 
   }

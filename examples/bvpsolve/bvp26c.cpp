@@ -22,7 +22,9 @@ void contract(TubeVector& x, double t0, bool incremental)
     ctccapd.preserve_slicing(true);
   else
     ctccapd.preserve_slicing(false);
+  //  cout << " avant capd contract " << x << " incr " << incremental << endl;
   ctccapd.contract (x, t0, incremental);
+  //  cout << " apres capd contract " << x << endl;
 }
 
  
@@ -64,22 +66,25 @@ int main() {
     tubex::Solver solver(epsilon);
 
     solver.set_refining_fxpt_ratio(2.0);
-    solver.set_propa_fxpt_ratio(0.999);
+    solver.set_propa_fxpt_ratio(0.);
+    
+    //    solver.set_var3b_fxpt_ratio(0.999);
     solver.set_var3b_fxpt_ratio(0.999);
 
     solver.set_var3b_propa_fxpt_ratio(0.999);
     
 
-    solver.set_var3b_timept(0);
+    solver.set_var3b_timept(2);
     solver.set_trace(1);
-    solver.set_max_slices(10000);
+    solver.set_max_slices(100000);
 
     solver.set_bisection_timept(-1);
 
     solver.set_refining_mode(0);
-    solver.set_stopping_mode(0);
+    solver.set_stopping_mode(2);
     solver.set_contraction_mode(2);
     solver.set_var3b_external_contraction(true);
+    //solver.set_var3b_external_contraction(false);
     
     std::ofstream Out("err.txt");
     std::streambuf* OldBuf = std::cerr.rdbuf(Out.rdbuf());

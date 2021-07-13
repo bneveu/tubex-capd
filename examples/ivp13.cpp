@@ -55,14 +55,14 @@ int main()
     solver.set_trace(1);
     solver.set_max_slices(2000);
     //    solver.set_max_slices(1);
-    solver.set_refining_mode(0);
+    solver.set_refining_mode(2);
     solver.set_bisection_timept(-1);
     solver.set_contraction_mode(4);
     solver.set_var3b_external_contraction(false);
     solver.set_stopping_mode(0);
     //list<TubeVector> l_solutions = solver.solve(x, f);
-    list<TubeVector> l_solutions = solver.solve(x, f,&contract);
-    //    list<TubeVector> l_solutions = solver.solve(x,&contract);
+    //  list<TubeVector> l_solutions = solver.solve(x, f,&contract);
+    list<TubeVector> l_solutions = solver.solve(x,&contract);
     cout << l_solutions.front() << endl;
     cout << "nb sol " << l_solutions.size() << endl;
     double t_max_diam;

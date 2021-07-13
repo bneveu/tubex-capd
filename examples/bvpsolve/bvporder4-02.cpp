@@ -1,17 +1,18 @@
 //created by neveu sept 30 2020
-// problem Bvpsolve32 (xi=1)
+// problem Bvporder4-02
 
 #include <iostream>
 #include <vector>
 #include "tubex.h"
 #include "tubex-solve.h"
+#include <capd/capdlib.h>
 #include <tubex_CtcCapd.h>
 
 using namespace std;
 using namespace ibex;
 using namespace tubex;
-TFunction f("x1", "x2" ,"x3", "x4", "(x2;x3;x4;10*(x2*x3-x1*x4))");
-TFunction f1("x1", "x2" ,"x3", "x4","(-x2;-x3;-x4;-10*(x2*x3-x1*x4))");
+TFunction f("x1", "x2" ,"x3", "x4", "(x2;x3;x4;x1+x3+exp(t)*(t-3))");
+TFunction f1("x1", "x2" ,"x3", "x4", "(-x2;-x3;-x4;-(x1+x3+exp(-t)*(-t-3)))");
 
 void contract(TubeVector& x, double t0, bool incremental)
 {CtcCapd ctccapd(f,f1);
@@ -21,12 +22,9 @@ void contract(TubeVector& x, double t0, bool incremental)
     ctccapd.preserve_slicing(false);
   ctccapd.contract (x, t0, incremental);
 }
-  
+ 
     
 int main() {
-  
-  //  TFunction f("x1", "x2" ,"x3", "x4", "(x2;x3;x4;4.6415888336128*(x2*x3-x1*x4))");
-
    
 
     /* =========== PARAMETERS =========== */
@@ -36,40 +34,45 @@ int main() {
 
     IntervalVector bounds (4);
 
-    bounds[0]=Interval(0,2);
-    //    bounds[1]=Interval(0,2);
-    bounds[1]=Interval(0,10);
+    bounds[0]=Interval(-100,100);
+    bounds[1]=Interval(-100,100);
 
-    // bounds[2]=Interval(-20,20);
-    //    bounds[3]=Interval(-50,0);
-    bounds[2]=Interval(-2000,2000);
-    bounds[3]=Interval(-200000,200000);
+    bounds[2]=Interval(-100,100);
+    bounds[3]=Interval(-100,100);
     TubeVector x(domain,bounds);
 
-    //    TubeVector x(domain,IntervalVector(4,Interval(-100,100)));
-    //TubeVector x(domain,IntervalVector(4,Interval(-50,50)));
 
     IntervalVector v(4);
-    v[0]=Interval(0);
-    v[1]=Interval(0);
-    // v[2]=Interval(0,100);
-    //    v[3]=Interval(-100,0);
-    v[2]=Interval(0,100);
-    v[3]=Interval(-100,0);
-    x.set(v, 0.); // ini
     v[0]=Interval(1);
     v[1]=Interval(0);
-    
-    v[2]=Interval(-2000,2000);
-    v[3]=Interval(-200000,200000);
+    //v[2]=Interval(-100,100);
+    // v[2]=Interval(-0.999,100);
+    v[2]=Interval(-100,-1.1);
+    //v[2]=Interval(-1.1,-0.9);
+    //v[2]=Interval(-100,100);
+    //    v[3]=Interval(-100,100);
+    // v[3]=Interval(-2.1,-1.9);
+    v[3]=Interval(-100,100);
+    //    v[3]=Interval(-1.999,100);
+    //    v[3]=Interval(-100,-2.001);
+     //  v[3]=Interval(-100,-1.999);
+    x.set(v, 0.); // ini
+    v[0]=Interval(0);
+    v[1]=Interval(-exp(1));
+    v[2]=Interval(-100,100);
+    v[3]=Interval(-100,100);
     
     x.set(v,1.);
+        
+    double eps0=0.002; 
+    double eps1=0.002;
+
     
-    
-    
+    /*
     double eps0=0.1; 
     double eps1=0.1;    
-
+    */
+    
     /* =========== SOLVER =========== */
     Vector epsilon(4);
     epsilon[0]=eps0;
@@ -78,19 +81,19 @@ int main() {
     epsilon[3]=eps1;
 
     tubex::Solver solver(epsilon);
-
+    
     solver.set_refining_fxpt_ratio(2.0);
-
+    //     solver.set_refining_fxpt_ratio(0.8);
     solver.set_propa_fxpt_ratio(0.99);
-    //solver.set_var3b_fxpt_ratio(-1);
+
 
     solver.set_var3b_fxpt_ratio(0.99);
 
     solver.set_var3b_propa_fxpt_ratio(0.99);
 
-    solver.set_var3b_timept(0);
+    solver.set_var3b_timept(2);
     solver.set_trace(1);
-    solver.set_max_slices(10000);
+    solver.set_max_slices(20000);
     
 
     solver.set_bisection_timept(-1);
@@ -99,13 +102,31 @@ int main() {
     solver.set_stopping_mode(2);
     solver.set_contraction_mode(4);
     solver.set_var3b_external_contraction(true);
+    //solver.set_var3b_external_contraction(false);
     std::ofstream Out("err.txt");
     std::streambuf* OldBuf = std::cerr.rdbuf(Out.rdbuf());
     list<TubeVector> l_solutions = solver.solve(x, f, &contract);
-    //    list<TubeVector> l_solutions = solver.solve(x, &contract);
-    //list<TubeVector> l_solutions = solver.solve(x, f);
-    std::cerr.rdbuf(OldBuf);
+    //list<TubeVector> l_solutions = solver.solve(x, &contract);
+    //    list<TubeVector> l_solutions = solver.solve(x, f);
+
+    /*
     
+    solver.set_refining_fxpt_ratio(2.);
+    solver.set_propa_fxpt_ratio(0.9);
+    solver.set_var3b_fxpt_ratio(-1);
+    
+    solver.set_max_slices(0);
+    solver.set_bisection_timept(3);
+    solver.set_stopping_mode(2);
+    solver.set_trace(1);
+    cout.precision(6);
+    std::ofstream Out("err.txt");
+    std::streambuf* OldBuf = std::cerr.rdbuf(Out.rdbuf());
+
+    list<TubeVector> l_solutions = solver.solve(x, &contract);
+    */
+    std::cerr.rdbuf(OldBuf);
+
     cout << "nb sol " << l_solutions.size() << endl;
     if(l_solutions.size()>0){
     double t_max_diam;

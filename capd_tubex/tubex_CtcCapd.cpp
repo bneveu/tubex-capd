@@ -20,7 +20,7 @@ using namespace tubex;
 
 namespace tubex
 {
-  CtcCapd::CtcCapd ( TFunction& ffwd,  TFunction& fbwd) : ffwd(ffwd), fbwd(fbwd){preserve_slicing(false);}
+  CtcCapd::CtcCapd ( TFunction& ffwd,  TFunction& fbwd) : ffwd(ffwd), fbwd(fbwd){preserve_slicing(false); capdstringfwd=tubexFnc2capdString(ffwd),capdstringbwd=tubexFnc2capdString(fbwd);}
 
  
   void CtcCapd::contract (TubeVector& x,double t0, bool incremental, double timestep) {
@@ -31,7 +31,7 @@ namespace tubex
 	try{
 	  IntervalVector a0 = x(domain.lb());
 
-	  const TubeVector& a = capd2tubex(domain,domain, ffwd,a0,timestep);
+	  const TubeVector& a = capd2tubex(domain,domain, capdstringfwd,a0,timestep);
 	  //  cout << " a " << endl;
 	  if (m_preserve_slicing || incremental)
 	    x&=a;
@@ -47,7 +47,7 @@ namespace tubex
 	  Interval domain1= Interval(-domain.ub(),-domain.lb());
 	  IntervalVector a0 = x(domain.ub());
 	  try {
-	    const TubeVector& b = capd2tubex(domain1,domain1,fbwd,a0,timestep);
+	    const TubeVector& b = capd2tubex(domain1,domain1,capdstringbwd,a0,timestep);
 	    if (m_preserve_slicing|| incremental )
 	      x&=reversetube(b);
 	    else
@@ -66,7 +66,8 @@ namespace tubex
 	    Interval domaint0 (t0,domain.ub());    
 	    IntervalVector a0 = x(t0);
 	    try{
-	      x&=capd2tubex(domain, domaint0,ffwd,a0,timestep);
+	      //	      cout << " appel capd 1 " << a0 << " domain " << domaint0 << endl;
+	      x&=capd2tubex(domain, domaint0,capdstringfwd,a0,timestep);
 	      }
 	      catch(const char* s){ //cout << s << endl;
 	      }
@@ -80,7 +81,10 @@ namespace tubex
 	    
 	    IntervalVector a0 = x(t0);
 	    try{
-	      x&= reversetube(capd2tubex(domain1,domain1t0,fbwd,a0,timestep));
+	      //	      cout << " appel capd 2 " << a0 << " domain " << domain1t0 << endl;
+
+	      x&= reversetube(capd2tubex(domain1,domain1t0,capdstringbwd,a0,timestep));
+
 	    }
 	    catch(const char* s){ //cout << s << endl;
 	    }

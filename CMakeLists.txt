@@ -75,6 +75,12 @@ target_link_libraries(ivp03 Capdtubex   ${CAPD_LIBS}  )
 add_executable(integrodiff examples/integrodiff.cpp)
 target_link_libraries(integrodiff Capdtubex   ${CAPD_LIBS}  )
 
+add_executable(ivppendulum examples/ivppendulum.cpp)
+target_link_libraries(ivppendulum Capdtubex   ${CAPD_LIBS}  )
+
+
+
+
 
 add_executable(ivp02-solver examples/ivp02-solver.cpp)
 target_link_libraries(ivp02-solver Capdtubex   ${CAPD_LIBS}  )
@@ -178,4 +184,9 @@ target_link_libraries(bvp35c Capdtubex   ${CAPD_LIBS}  )
 add_executable(bvp40 examples/bvpsolve/bvp40.cpp)
 target_link_libraries(bvp40 Capdtubex   ${CAPD_LIBS}  )
 
+add_executable(bvporder4-01 examples/bvpsolve/bvporder4-01.cpp)
+target_link_libraries(bvporder4-01 Capdtubex   ${CAPD_LIBS}  )
+
+add_executable(bvporder4-02 examples/bvpsolve/bvporder4-02.cpp)
+target_link_libraries(bvporder4-02 Capdtubex   ${CAPD_LIBS}  )
 ###########################################################

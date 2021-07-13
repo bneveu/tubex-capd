@@ -14,6 +14,7 @@ using namespace tubex;
 
   TFunction f("x1", "x2" ,"(x2;10*x1*(1-x2))");
   TFunction f1("x1", "x2" ,"(-x2;-10*x1*(1-x2))");
+
 void contract(TubeVector& x, double t0, bool incremental)
 {CtcCapd ctccapd(f,f1);
   if (x.volume() < DBL_MAX && x.nb_slices() > 1)
@@ -57,7 +58,7 @@ int main() {
     epsilon[1]=eps1;
 
     tubex::Solver solver(epsilon);
-
+    /*
     solver.set_refining_fxpt_ratio(2.0);
     solver.set_propa_fxpt_ratio(0.);
     solver.set_var3b_fxpt_ratio(0.99);
@@ -81,6 +82,27 @@ int main() {
     list<TubeVector> l_solutions = solver.solve(x, f, &contract);
     //    list<TubeVector> l_solutions = solver.solve(x, &contract);
     //   list<TubeVector> l_solutions = solver.solve(x, f);
+    */
+    solver.set_var3b_timept(2);
+    solver.set_refining_fxpt_ratio(2.);
+    solver.set_propa_fxpt_ratio(0.);
+    solver.set_var3b_fxpt_ratio(0.99);
+    solver.set_var3b_propa_fxpt_ratio(0.99);
+    solver.set_var3b_external_contraction(true);
+    solver.set_max_slices(2000);
+    solver.set_refining_mode(0);
+    solver.set_bisection_timept(-1);
+    solver.set_stopping_mode(2);
+    solver.set_fixpoint_mode(1);
+    solver.set_trace(1);
+    solver.set_contraction_mode(2);
+    cout.precision(6);
+    std::ofstream Out("err.txt");
+    std::streambuf* OldBuf = std::cerr.rdbuf(Out.rdbuf());
+
+    list<TubeVector> l_solutions = solver.solve(x, f, &contract);
+    //list<TubeVector> l_solutions = solver.solve(x,  &contract);
+
     std::cerr.rdbuf(OldBuf);
     
     cout << "nb sol " << l_solutions.size() << endl;
