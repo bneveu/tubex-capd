@@ -13,11 +13,11 @@
 #define __TUBEX_CAPD_H__
 
 #include <capd/capdlib.h>
-#include "tubex_TubeVector.h"
+#include "codac_TubeVector.h"
 #include "ibex_IntervalVector.h"
 
 
-namespace tubex
+namespace codac
 {
 
     std::string tubexFnc2capdString(const TFunction& f);

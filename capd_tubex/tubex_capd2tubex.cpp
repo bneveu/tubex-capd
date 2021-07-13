@@ -9,20 +9,20 @@
  */
 
 #include "tubex_capd2tubex.h"
-#include "tubex_Exception.h"
+#include "codac_Exception.h"
 #include "capd/capdlib.h"
 
 using namespace std;
 using namespace ibex;
-using namespace tubex;
 
-namespace tubex
+
+namespace codac
 {
 
     string tubexFnc2capdString(const TFunction& f)
     {
 
-        int a_capd_dim = f.nb_vars();
+        int a_capd_dim = f.nb_var();
         int a_ibex_dim = a_capd_dim+1;
 
 	ibex::IntervalVector a_ibex(a_ibex_dim);

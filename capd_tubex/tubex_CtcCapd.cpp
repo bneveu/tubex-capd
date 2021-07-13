@@ -10,19 +10,18 @@
 
 
 
-#include "tubex_Exception.h"
+#include "codac_Exception.h"
 #include "tubex_CtcCapd.h"
 
 using namespace std;
 using namespace ibex;
-using namespace tubex;
 
 
-namespace tubex
+namespace codac
 {
   CtcCapd::CtcCapd ( TFunction& ffwd,  TFunction& fbwd) : ffwd(ffwd), fbwd(fbwd){preserve_slicing(false); capdstringfwd=tubexFnc2capdString(ffwd),capdstringbwd=tubexFnc2capdString(fbwd);}
 
- 
+  void  CtcCapd::contract(std::vector<Domain*>& v_domains){;}
   void CtcCapd::contract (TubeVector& x,double t0, bool incremental, double timestep) {
     if (!(x.is_empty())){
       Interval domain= x[0].tdomain();

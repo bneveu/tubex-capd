@@ -9,7 +9,7 @@ project(tubex-capd)
 ################################################################################
 
   set(IBEX_ROOT "/home/neveub/tubex/ibex-lib/install") # Install path of ibex lib
-  set(TUBEX_ROOT "/home/neveub/tubex/tubex-lib/")
+  set(TUBEX_ROOT "/home/neveub/tubex/codac-lib/")
   set(TUBEX_SOLVER_ROOT "/home/neveub/tubex/tubex-solve/")
  
   set(IBEX_LIB_DIR "${IBEX_ROOT}/lib"
@@ -54,9 +54,19 @@ include_directories(${CAPD_DIR}/install/include/)
 
 link_directories(${CAPD_LIB_DIR})
 
+
 # CAPD LIBRARY BINARY
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -frounding-math -D__USE_FILIB__")
-set(CAPD_LIBS   tubex-solve tubex capd ibex prim)
+set(CAPD_LIBS   tubex-solve codac capd ibex prim)
+
+find_package(Eigen3 REQUIRED NO_MODULE)
+  message(STATUS "Found Eigen3 version ${EIGEN3_VERSION}")
+  add_definitions(${EIGEN3_DEFINITIONS})
+  include_directories(${EIGEN3_INCLUDE_DIRS})
+
+  add_definitions(-Dtubex=codac)
+
+
 include_directories(capd_tubex)
 add_library(Capdtubex STATIC capd_tubex/tubex_CtcCapd.h capd_tubex/tubex_CtcCapd.cpp capd_tubex/tubex_TubeVectorODE.h capd_tubex/tubex_TubeVectorODE.cpp capd_tubex/tubex_capd2tubex.h capd_tubex/tubex_capd2tubex.cpp)
 target_link_libraries(Capdtubex ${CAPD_LIBS})

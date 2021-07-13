@@ -9,11 +9,11 @@
  */
 
 #include "tubex_TubeVectorODE.h"
-#include "tubex_Exception.h"
+#include "codac_Exception.h"
 
 using namespace std;
 using namespace ibex;
-using namespace tubex;
+using namespace codac;
 
 
 namespace tubex
